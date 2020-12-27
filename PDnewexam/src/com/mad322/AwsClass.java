@@ -256,6 +256,86 @@ int rowCount = preparedStatement.executeUpdate();
 		return Response.status(200).entity(mainObj.toString()).build();
 
 	}
+	@DELETE
+	@Path("/delAccount/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteAccount(@PathParam("id") String id)
+	{
+		MysqlCon connection= new MysqlCon();
+		con= connection.getConnection();
+		Status status= Status.OK;
+		try
+		{
+			String query="DELETE  FROM `acc_transaction` WHERE account_id = "+id;
+			stmt= con.createStatement();
+			stmt.executeUpdate(query);
+
+			int rowCount = stmt.executeUpdate(query);
+			if (rowCount > 0)
+			{
+				status=Status.OK;
+				mainObj.accumulate("status", status);
+				mainObj.accumulate("Message","Data successfully updated !");
+
+			}
+			else
+			{
+				status=Status.NOT_MODIFIED;
+				mainObj.accumulate("status", status);
+				mainObj.accumulate("Message","Something Went Wrong");
+
+			}
+
+
+		}catch(SQLException e)
+		{
+			e.printStackTrace();
+			status=Status.NOT_MODIFIED;
+			mainObj.accumulate("status",status);
+			mainObj.accumulate("Message","Something Went Wrong");
+		}
+
+
+		return Response.status(status).entity(mainObj.toString()).build();
+	}
+	@GET
+	@Path("/getAccountTrans/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAccountTrans(@PathParam("id") String id) {
+		MysqlCon connection = new MysqlCon();
+
+		con = connection.getConnection();
+
+		try {
+			stmt = con.createStatement();
+
+			rs = stmt.executeQuery("Select 	FUNDS_AVAIL_DATE,TXN_DATE from acc_transaction where  ACCOUNT_ID<"+id);
+
+			while (rs.next()) {
+				childObj = new JSONObject();
+
+				childObj.accumulate("TXN_DATE", rs.getString("TXN_DATE"));
+				childObj.accumulate("FUNDS_AVAIL_DATE", rs.getString("FUNDS_AVAIL_DATE"));
+				;
+				jsonArray.put(childObj);
+			}
+
+			mainObj.put("Account", jsonArray);
+		} catch (SQLException e) {
+			System.out.println("SQL Exception : " + e.getMessage());
+		} finally {
+			try {
+				con.close();
+				stmt.close();
+				rs.close();
+			} catch (SQLException e) {
+				System.out.println("Finally Block SQL Exception : " + e.getMessage());
+			}
+		}
+
+		return Response.status(200).entity(mainObj.toString()).build();
+
+	}
 
 
 

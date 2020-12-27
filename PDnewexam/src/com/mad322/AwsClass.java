@@ -337,8 +337,96 @@ int rowCount = preparedStatement.executeUpdate();
 
 	}
 
+@DELETE
+	@Path("/delemp/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response selectEmployee(@PathParam("id") String id)
+	{
+		MysqlCon connection= new MysqlCon();
+		con= connection.getConnection();
+		Status status= Status.OK;
+		try
+		{
+			String query="DELETE FROM `midterm`.`employee` WHERE `EMP_ID` = "+id;
+			stmt= con.createStatement();		
+			stmt.executeUpdate(query);
+			
+			int rowCount = stmt.executeUpdate(query);
+			if (rowCount > 0) 
+    		{
+    		status=Status.OK;
+    		mainObj.accumulate("status", status);
+    		mainObj.accumulate("Message","Data successfully Deleted !");
+    		
+    		}
+    		else
+    		{
+    			status=Status.NOT_MODIFIED;
+    			mainObj.accumulate("status", status);
+    			mainObj.accumulate("Message","Something Went Wrong");
+    						
+    		}
+    		
+    	}catch(SQLException e) {
+    		e.printStackTrace();
+    		status=Status.NOT_MODIFIED;
+    		mainObj.accumulate("status", status);
+    		mainObj.accumulate("Message","Something Went Wrong");
+    	}
+    	
+    	return Response.status(status).entity(mainObj.toString()).build();
+    }
 
+@PUT
+	 @Consumes(MediaType.APPLICATION_JSON)
+	 @Path("/Cust/{id}")
+	 @Produces(MediaType.APPLICATION_JSON)
+	 public Response updateCust(@PathParam("id")int id,Customer cust)
+	 {
+	 	MysqlCon connection= new MysqlCon();
+	 	con= connection.getConnection();
+	 	Status status =Status.OK;
+	 	try {
+	 		String query ="UPDATE `midterm`.`customer` SET `CUST_ID` =?,`ADDRESS` =?,`CITY` =?,`CUST_TYPE_CD` =?, `FED_ID` =?,`POSTAL_CODE` =?,`STATE` =? WHERE `CUST_ID` ="+id;
+	 		
+	 
+	 		preparedStatement = con.prepareStatement(query);   		
+	 		   		
+	 		preparedStatement.setInt(1, cust.getCUST_ID());
+	 		preparedStatement.setString(2, cust.getADDRESS());
+	 		preparedStatement.setString(3,cust.getCITY());
+	 		preparedStatement.setString(4,cust.getCUST_TYPE_CD());
+	 		preparedStatement.setString(5,cust.getFED_ID());
+	 		preparedStatement.setString(6, cust.getPOSTAL_CODE());
+	 		preparedStatement.setString(7, cust.getSTATE());
+	 		
+	 		
 
-
+	 		int rowCount = preparedStatement.executeUpdate();
+	 		
+	 		if (rowCount > 0) 
+	 		{
+	 		status=Status.OK;
+	 		mainObj.accumulate("status", status);
+	 		mainObj.accumulate("Message","Data successfully updated !");
+	 		
+	 		}
+	 		else
+	 		{
+	 			status=Status.NOT_MODIFIED;
+	 			mainObj.accumulate("status", status);
+	 			mainObj.accumulate("Message","Something Went Wrong");
+	 						
+	 		}
+	 		
+	 	}catch(SQLException e) {
+	 		e.printStackTrace();
+	 		status=Status.NOT_MODIFIED;
+	 		mainObj.accumulate("status", status);
+	 		mainObj.accumulate("Message","Something Went Wrong");
+	 	}
+	 	
+	 	return Response.status(status).entity(mainObj.toString()).build();
+	 }
 
 }

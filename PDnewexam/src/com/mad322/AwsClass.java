@@ -428,5 +428,94 @@ int rowCount = preparedStatement.executeUpdate();
 	 	
 	 	return Response.status(status).entity(mainObj.toString()).build();
 	 }
+	 @GET
+   @Path("/getCus/{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+ public Response getCustomer(@PathParam("id") String id) {
+ 	MysqlCon connection = new MysqlCon();
+
+ 	con = connection.getConnection();
+
+ 	try {
+ 		stmt = con.createStatement();
+
+ 		rs = stmt.executeQuery("Select ADDRESS,CITY from  customer where  CUST_ID="+id);
+
+ 		while (rs.next()) {
+ 			childObj = new JSONObject();
+
+ 			childObj.accumulate("ADDRESS", rs.getString("ADDRESS"));
+ 			childObj.accumulate("CITY", rs.getString("CITY"));
+ 			;
+ 			jsonArray.put(childObj);
+ 		}
+
+ 		mainObj.put("Account", jsonArray);
+ 	} catch (SQLException e) {
+ 		System.out.println("SQL Exception : " + e.getMessage());
+ 	} finally {
+ 		try {
+ 			con.close();
+ 			stmt.close();
+ 			rs.close();
+ 		} catch (SQLException e) {
+ 			System.out.println("Finally Block SQL Exception : " + e.getMessage());
+ 		}
+ 	}
+
+ 	return Response.status(200).entity(mainObj.toString()).build();
+ }@PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/editBranch/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateBranch(@PathParam("id")int id,Branch branch)
+    {
+    	MysqlCon connection= new MysqlCon();
+    	con= connection.getConnection();
+    	Status status =Status.OK;
+    	try {
+    		String query ="UPDATE `midterm`.`branch` SET `BRANCH_ID` =?,`ADDRESS` =?,`CITY` =?,`NAME` =?, `STATE` =?,`ZIP_CODE` =? WHERE `BRANCH_ID` ="+id;
+    		
+    
+    		preparedStatement = con.prepareStatement(query);   		
+    		   		
+    		preparedStatement.setInt(1, branch.getBRANCH_ID());
+    		preparedStatement.setString(2, branch.getADDRESS());
+    		preparedStatement.setString(3,branch.getCITY());
+    		preparedStatement.setString(4,branch.getNAME());
+    		preparedStatement.setString(5,branch.getSTATE());
+    		preparedStatement.setString(6, branch.getZIP_CODE());
+    		
+    		
+
+    		int rowCount = preparedStatement.executeUpdate();
+    		
+    		if (rowCount > 0) 
+    		{
+    		status=Status.OK;
+    		mainObj.accumulate("status", status);
+    		mainObj.accumulate("Message","Data successfully updated !");
+    		
+    		}
+    		else
+    		{
+    			status=Status.NOT_MODIFIED;
+    			mainObj.accumulate("status", status);
+    			mainObj.accumulate("Message","Something Went Wrong");
+    						
+    		}
+    		
+    	}catch(SQLException e) {
+    		e.printStackTrace();
+    		status=Status.NOT_MODIFIED;
+    		mainObj.accumulate("status", status);
+    		mainObj.accumulate("Message","Something Went Wrong");
+    	}
+    	
+    	return Response.status(status).entity(mainObj.toString()).build();
+    }
+	return Response.status(status).entity(mainObj.toString()).build();
+    }
+
 
 }
